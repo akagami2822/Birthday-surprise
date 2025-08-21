@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Happy Birthday, My Love 🎂💖</title>
+  <meta name="theme-color" content="#ff7ab6" />
+  <style>
+    /* =====================
+       QUICK CUSTOMIZATION
+       =====================
+       Edit the values in the CONFIG section (search for CONFIG in JS).
+    */
+
+    :root {
+      --bg: #fff5f8;
+      --ink: #27272a;
+      --accent: #ff7ab6;
+      --accent-2: #ffd166;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: ui-rounded, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--ink);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    /* Floating hearts/balloons backdrop */
+    .backdrop {
+      position: fixed; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .floaty { position: absolute; bottom: -80px; opacity: .85; filter: drop-shadow(0 8px 10px rgba(0,0,0,.12)); }
+    .floaty.heart::before {
+      content: ""; display: block; width: 28px; height: 24px; background: var(--accent);
+      position: relative; transform: rotate(-45deg); border-radius: 6px 6px 0 0;
+    }
+    .floaty.heart::after {
+      content: ""; position: absolute; top: 0; left: 0; width: 28px; height: 24px; background: var(--accent);
+      transform: rotate(90deg); border-radius: 6px 6px 0 0; transform-origin: 14px 12px;
+    }
+    .floaty.balloon { width: 30px; height: 40px; border-radius: 50% 50% 45% 45%; background: var(--accent-2); }
+    .floaty.balloon::after { content: ""; position: absolute; bottom: -12px; left: 50%; width: 2px; height: 14px; background: rgba(0,0,0,.15); transform: translateX(-50%); }
+    @keyframes rise { to { transform: translateY(-120vh) translateX(var(--drift, 0)); opacity: 0; } }
+
+    /* Layout */
+    .wrap { max-width: 980px; margin: 0 auto; padding: 24px; }
+
+    header.hero {
+      display: grid; place-items: center; min-height: 70vh; text-align: center; position: relative;
+    }
+    .badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: #fff; border: 1px solid #ffe1ec; border-radius: 999px; box-shadow: var(--shadow); color: var(--muted); font-weight: 600; }
+    .title { font-size: clamp(32px, 7vw, 64px); line-height: 1.05; margin: 16px 0 10px; }
+    .subtitle { color: var(--muted); font-size: clamp(14px, 2.6vw, 18px); }
+
+    .cta-row { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      -webkit-tap-highlight-color: transparent;
+      appearance: none; border: 0; cursor: pointer; font-weight: 700; letter-spacing: .2px;
+      padding: 14px 18px; border-radius: 999px; box-shadow: var(--shadow); transition: transform .08s ease, box-shadow .2s ease;
+    }
+    .btn.primary { background: var(--accent); color: #fff; }
+    .btn.secondary { background: #fff; color: var(--ink); border: 1px solid #f3d2df; }
+    .btn:active { transform: translateY(1px); box-shadow: 0 6px 16px rgba(0,0,0,.08); }
+
+    /* Photo slider */
+    .card { background: var(--card); border: 1px solid #ffe1ec; border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .gallery { position: relative; height: min(60vh, 440px); }
+    .gallery img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .8s ease; }
+    .gallery img.active { opacity: 1; }
+    .gallery .dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+    .gallery .dots button { width: 9px; height: 9px; border-radius: 50%; border: 0; background: rgba(255,255,255,.65); cursor: pointer; }
+    .gallery .dots button.active { background: #fff; }
+
+    section { margin: 36px 0; }
+
+    /* Reasons I love you */
+    .reasons { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .reason { padding: 16px; border-radius: var(--radius); background: #fff; border: 1px solid #ffe1ec; box-shadow: var(--shadow); min-height: 110px; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: 600; }
+
+    /* Footer */
+    footer { text-align: center; color: var(--muted); padding: 30px 0 60px; }
+
+    /* Accessibility: reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+      .floaty { display: none !important; }
+      .gallery img { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="backdrop" aria-hidden="true" id="backdrop"></div>
+
+  <div class="wrap">
+    <header class="hero">
+      <div class="badge">🎂 Birthday •22 August <span id="year"></span></div>
+      <h1 class="title" id="title">Happy Birthday, My Love!</h1>
+      <p class="subtitle" id="subtitle">You make my world brighter every single day. Today is all about you. ✨</p>
+
+      <div class="cta-row">
+        <button class="btn primary" id="playMusic">Play a Song 🎵</button>
+        <button class="btn secondary" id="showReasons">Reveal 10 Reasons 💌</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="gallery" id="gallery" aria-label="Photo memories slideshow">
+        <!-- Replace src values with your photos (local or hosted). Keep the same number of images or adjust CONFIG.images. -->
+        <img src="images/pic1.jpg" alt="Memory 1" class="active" />
+        <img src="images/pic2.jpg" alt="Memory 2" />
+        <img src="images/pic3.jpg" alt="Memory 3" />
+        <img src="images/pic4.jpg" alt="Memory 4" />
+        <img src="images/pic5.jpg" alt="Memory 5" /> 
+        <img src="images/pic6.jpg" alt="Memory 6" /> 
+        <img src="images/pic7.jpg" alt="Memory 7" /> 
+        <img src="images/pic8.jpg" alt="Memory 8" /> 
+        <img src="images/pic9.jpg" alt="Memory 9" /> 
+        <img src="images/pic10.jpg" alt="Memory 10" />  
+        <div class="dots" id="dots" role="tablist" aria-label="Slide selectors"></div>
+      </div>
+    </section>
+
+    <section>
+      <h2 style="margin:0 0 12px;">Reasons I love you</h2>
+      <div class="reasons" id="reasons"></div>
+    </section>
+    
+    <footer>
+      Made with ❤️ by <span id="yourName">You</span> • <span id="today"></span>
+    </footer>
+
+  </div>
+
+  <!-- Simple built-in melody (royalty-free style). You can swap with an mp3 URL you both love. iOS requires a user gesture to play. -->
+  <audio id="audio" preload="auto">
+    <source src="audio/song.mp3" type="audio/mpeg" />
+  </audio>
+
+  <script>
+    // =====================
+    // CONFIG (Edit freely)
+    // =====================
+    const CONFIG = {
+      yearLabel: new Date().getFullYear(),
+      title: "Happy Birthday, My Love!",
+      subtitle: "Meriiiiiiiiiii pyaaaaaariiiiiiiii siiiii puckudiiiiiiiiiiiiiiiiiiiii khooobbbbbb saaaraaaaaaa happpyyyyy birthdaysssssss babyyyyyyy🤭🤭💙❤️🌟 ✨",
+      yourName: "Vedant",
+      recipientName: "Puchiiiiiiiiiii🤭🤭🌸💙💗💌✨",
+      accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+      accent2: getComputedStyle(document.documentElement).getPropertyValue('--accent-2').trim(),
+      // Add/change messages (max 10 shown). Keep them short and sincere.
+      reasons: [
+        "Aaapkiiiii ye atii sundarr adayeeeeee 🤭🌸",
+        "Meriiiii pooriiii ki pooriiii duniyaaaaaa meraaa jahannn🤭💗.",
+        "Aapkiiiiiiiii muskurahatt dekh chand bhi sharmaa jaayee🤭💟",
+        "Aapkiiiiiiii ye samundarrrr jesiiii gehriiii aakhenn🤭💖.",
+        "Aapkeeeeee reshamm se komalll keshhh🤭🌟.",
+        "Aapkiiiiiiiiiii fhulooo se bhiiii pyaaaariii khusboooo🤭💌.",
+        "Aapkeeee itneeeeee komallll lipssssss🤭💗",
+        "Aapkaaaaa mimuuuuuu se itnaaa pyaaar krnaassss🤭🌹",
+        "Aaapkaaaaa mimuuuu prrsssss itnaaaa bhrosaaa honaasss🤭✨",
+        "Mimuuuu hmeshaaa aapseee bhttt pyaar kregeeesss puchuuu🤭❣️"
+      ],
+      // Slideshow settings
+      slideIntervalMs: 3200,
+      // Backdrop style: 'hearts' or 'balloons' or 'mixed'
+      backdrop: 'mixed',
+      // Optional: Put your own MP3 URL here
+      // musicUrl: 'https://your-cdn.com/your-song.mp3'
+    };
+
+    // Apply basic text
+    document.getElementById('year').textContent = CONFIG.yearLabel;
+    document.getElementById('title').textContent = CONFIG.title.replace('My Love', CONFIG.recipientName);
+    document.getElementById('subtitle').textContent = CONFIG.subtitle;
+    document.getElementById('yourName').textContent = CONFIG.yourName;
+    document.getElementById('today').textContent = new Date().toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' });
+
+    // Optional music override
+    if (CONFIG.musicUrl) {
+      document.getElementById('audio').src = CONFIG.musicUrl;
+    }
+
+    // =====================
+    // Backdrop floaties
+    // =====================
+    const backdrop = document.getElementById('backdrop');
+    const WIDTH = () => window.innerWidth;
+    const TYPES = CONFIG.backdrop === 'mixed' ? ['heart','balloon'] : [CONFIG.backdrop];
+
+    function spawnFloaty() {
+      const kind = TYPES[Math.floor(Math.random() * TYPES.length)];
+      const el = document.createElement('div');
+      el.className = `floaty ${kind}`;
+      const left = Math.random() * (WIDTH() - 40);
+      const dur = 8 + Math.random() * 10; // 8–18s
+      const scale = 0.7 + Math.random() * 1.3; // 0.7–2.0
+      const drift = (Math.random() * 120 - 60) + 'px';
+      el.style.left = left + 'px';
+      el.style.transform = `translateY(0) scale(${scale})`;
+      el.style.setProperty('--drift', drift);
+      el.style.animation = `rise ${dur}s linear forwards`;
+
+      // Color variety
+      if (kind === 'heart' && Math.random() > .5) el.style.filter = 'hue-rotate(-12deg) drop-shadow(0 8px 10px rgba(0,0,0,.12))';
+      if (kind === 'balloon' && Math.random() > .5) el.style.background = CONFIG.accent;
+
+      backdrop.appendChild(el);
+      setTimeout(() => backdrop.removeChild(el), dur * 1000);
+    }
+
+    let floatyTimer = setInterval(spawnFloaty, 700);
+    window.addEventListener('pagehide', () => clearInterval(floatyTimer));
+
+    // =====================
+    // Simple slideshow
+    // =====================
+    const gallery = document.getElementById('gallery');
+    const imgs = Array.from(gallery.querySelectorAll('img'));
+    const dots = document.getElementById('dots');
+    let idx = 0, timer = null;
+
+    function go(n) {
+      imgs[idx].classList.remove('active');
+      dots.children[idx]?.classList.remove('active');
+      idx = (n + imgs.length) % imgs.length;
+      imgs[idx].classList.add('active');
+      dots.children[idx]?.classList.add('active');
+    }
+
+    function start() {
+      stop();
+      timer = setInterval(() => go(idx + 1), CONFIG.slideIntervalMs);
+    }
+    function stop() { if (timer) clearInterval(timer); }
+
+    // Build dots
+    imgs.forEach((_, i) => {
+      const b = document.createElement('button');
+      b.addEventListener('click', () => { go(i); start(); });
+      if (i === 0) b.classList.add('active');
+      dots.appendChild(b);
+    });
+    start();
+
+    // =====================
+    // Reasons list (revealed on demand)
+    // =====================
+    const reasonsWrap = document.getElementById('reasons');
+    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+    function renderReasons() {
+      reasonsWrap.innerHTML = '';
+      shuffle([...CONFIG.reasons]).slice(0, 10).forEach((t) => {
+        const d = document.createElement('div');
+        d.className = 'reason';
+        d.textContent = t;
+        reasonsWrap.appendChild(d);
+      });
+    }
+
+    // =====================
+    // Buttons
+    // =====================
+    const audio = document.getElementById('audio');
+    document.getElementById('playMusic').addEventListener('click', async () => {
+      try { await audio.play(); } catch (e) { alert('Tap again to allow audio on iPad.'); }
+    });
+
+    document.getElementById('showReasons').addEventListener('click', () => {
+      renderReasons();
+      burstConfetti(120);
+    });
+
+    document.getElementById('launchConfetti').addEventListener('click', () => burstConfetti(180));
+
+    // =====================
+    // Minimal confetti (no deps)
+    // =====================
+    function burstConfetti(count=120) {
+      const dur = 1200;
+      for (let i=0;i<count;i++) {
+        const p = document.createElement('div');
+        const size = 6 + Math.random()*8;
+        p.style.position = 'fixed';
+        p.style.left = (Math.random()*100) + 'vw';
+        p.style.top = '-10px';
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.background = Math.random() > .5 ? CONFIG.accent : CONFIG.accent2;
+        p.style.opacity = .9;
+        p.style.transform = `translateY(0) rotate(${Math.random()*180}deg)`;
+        p.style.borderRadius = Math.random() > .4 ? '2px' : '50%';
+        p.style.pointerEvents = 'none';
+        p.style.transition = `transform ${dur}ms cubic-bezier(.19,1,.22,1), opacity ${dur}ms linear`;
+        document.body.appendChild(p);
+        requestAnimationFrame(() => {
+          const xDrift = (Math.random()*60 - 30) + 'vw';
+          p.style.transform = `translateY(110vh) translateX(${xDrift}) rotate(${360+Math.random()*360}deg)`;
+          p.style.opacity = 0;
+        });
+        setTimeout(() => p.remove(), dur + 200);
+      }
+    }
+
+    // Pause slideshow while interacting to reduce motion overload
+    ['mouseenter','touchstart','focusin'].forEach(ev => gallery.addEventListener(ev, stop));
+    ['mouseleave','touchend','focusout'].forEach(ev => gallery.addEventListener(ev, start));
+  </script>
+</body>
+</html>
